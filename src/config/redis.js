@@ -1,14 +1,15 @@
 const redis = require('redis');
 const logger = require('../utils/logger');
+const config = require('../config/appConfig');
 
 let client;
 
 const connectRedis = async () => {
   try {
     client = redis.createClient({
-      host: process.env.REDIS_HOST || 'localhost',
-      port: process.env.REDIS_PORT || 6379,
-      password: process.env.REDIS_PASSWORD || undefined,
+      host: config.REDIS_HOST || 'localhost',
+      port: config.REDIS_PORT || 6379,
+      password: config.REDIS_PASSWORD || undefined,
       retry_strategy: (options) => {
         if (options.error && options.error.code === 'ECONNREFUSED') {
           return new Error('The server refused the connection');

@@ -1,8 +1,10 @@
 const { Op } = require('sequelize');
-const { Ride, User, Driver, Vehicle, RideTracking } = require('../../models');
+const { Ride, User, Driver, Vehicle, RideTracking } = require('../models');
 const { getRedisClient } = require('../config/redis');
 const { calculateDistance, calculateFare, generateRideId } = require('../utils/helpers');
 const logger = require('../utils/logger');
+const config = require('../config/appConfig');
+
 
 class RideService {
   /**
@@ -104,7 +106,7 @@ class RideService {
           driver.currentLocation.longitude
         );
 
-        return distance <= process.env.maxMatchingDistance;
+        return distance <= config.maxMatchingDistance;
       });
 
       // Sort by distance

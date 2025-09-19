@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=postgres
+      - REDIS_HOST=redis
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    volumes:
+      - ./src/uploads:/app/src/uploads
+    networks:
+      - rideshare-network
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: rideshare_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - rideshare-network
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    networks:
+      - rideshare-network
+
+  adminer:
+    image: adminer
+    ports:
+      - "8080:8080"
+    networks:
+      - rideshare-network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  rideshare-network:
+    driver: bridge

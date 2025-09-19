@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const { getRedisClient } = require('../config/redis');
 const ApiResponse = require('../utils/response');
 const logger = require('../utils/logger');
+const config = require('../config/appConfig');
 
 /**
  * Verify JWT token
@@ -25,7 +26,7 @@ const verifyToken = async (req, res, next) => {
     }
 
     // Verify token
-    const decoded = jwt.verify(token, process.env.jwtSecret);
+    const decoded = jwt.verify(token, config.jwtSecret);
     req.user = decoded;
 
     next();
@@ -75,7 +76,7 @@ const optionalAuth = async (req, res, next) => {
     }
 
     const token = authHeader.split(' ')[1];
-    const decoded = jwt.verify(token, process.env.jwtSecret);
+    const decoded = jwt.verify(token, config.jwtSecret);
     req.user = decoded;
 
     next();

@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const RatingController = require('../controllers/ratingController');
 const { verifyToken, checkRole } = require('../middleware/auth');
-const { generalLimiter } = require('../middleware/rateLimiter');
+const { createGeneralLimiter } = require('../middleware/rateLimiter');
 
 /**
  * @swagger
@@ -44,7 +44,7 @@ const { generalLimiter } = require('../middleware/rateLimiter');
  *       400:
  *         description: Invalid request or already rated
  */
-router.post('/submit', verifyToken, checkRole(['rider', 'driver']), generalLimiter, RatingController.submitRating);
+router.post('/submit', verifyToken, checkRole(['rider', 'driver']), createGeneralLimiter, RatingController.submitRating);
 
 /**
  * @swagger

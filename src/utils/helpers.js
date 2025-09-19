@@ -1,5 +1,7 @@
 const crypto = require('crypto');
 const moment = require('moment');
+const config = require('../config/appConfig');
+
 
 /**
  * Calculate distance between two coordinates using Haversine formula
@@ -54,9 +56,9 @@ const calculateFare = (distance, duration, rideType = 'economy') => {
   };
 
   const multiplier = multipliers[rideType] || 1;
-  const baseFare = process.env.baseFare * multiplier;
-  const distanceFare = distance * process.env.perKmRate * multiplier;
-  const timeFare = (duration / 60) * process.env.perMinuteRate * multiplier; // duration in seconds
+  const baseFare = config.baseFare * multiplier;
+  const distanceFare = distance * config.perKmRate * multiplier;
+  const timeFare = (duration / 60) * config.perMinuteRate * multiplier; // duration in seconds
 
   return Math.round(baseFare + distanceFare + timeFare);
 };

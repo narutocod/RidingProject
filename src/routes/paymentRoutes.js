@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const PaymentController = require('../controllers/paymentController');
 const { verifyToken, checkRole } = require('../middleware/auth');
-const { generalLimiter } = require('../middleware/rateLimiter');
+const { createGeneralLimiter } = require('../middleware/rateLimiter');
 
 /**
  * @swagger
@@ -40,7 +40,7 @@ const { generalLimiter } = require('../middleware/rateLimiter');
  *       400:
  *         description: Invalid request or insufficient funds
  */
-router.post('/ride', verifyToken, checkRole(['rider']), generalLimiter, PaymentController.processRidePayment);
+router.post('/ride', verifyToken, checkRole(['rider']), createGeneralLimiter, PaymentController.processRidePayment);
 
 /**
  * @swagger
@@ -71,7 +71,7 @@ router.post('/ride', verifyToken, checkRole(['rider']), generalLimiter, PaymentC
  *       200:
  *         description: Money added to wallet successfully
  */
-router.post('/wallet/add-money', verifyToken, generalLimiter, PaymentController.addMoneyToWallet);
+router.post('/wallet/add-money', verifyToken, createGeneralLimiter, PaymentController.addMoneyToWallet);
 
 /**
  * @swagger

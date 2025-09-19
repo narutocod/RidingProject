@@ -1,5 +1,5 @@
 const { Op } = require('sequelize');
-const { Rating, Ride, User, Driver, Rider } = require('../../models');
+const { Rating, Ride, User, Driver, Rider } = require('../models');
 const logger = require('../utils/logger');
 
 class RatingService {

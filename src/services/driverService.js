@@ -1,5 +1,5 @@
 const { Op } = require('sequelize');
-const { Driver, User, Vehicle, DriverLocation, Ride } = require('../../models');
+const { Driver, User, Vehicle, DriverLocation, Ride } = require('../models');
 const { getRedisClient } = require('../config/redis');
 const { calculateDistance } = require('../utils/helpers');
 const logger = require('../utils/logger');

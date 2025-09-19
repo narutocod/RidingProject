@@ -3,7 +3,7 @@ const router = express.Router();
 const DriverController = require('../controllers/driverController');
 const { verifyToken, checkRole } = require('../middleware/auth');
 const { uploadDriverDocs, handleUploadError } = require('../middleware/upload');
-const { generalLimiter } = require('../middleware/rateLimiter');
+const { createGeneralLimiter } = require('../middleware/rateLimiter');
 
 /**
  * @swagger
@@ -98,7 +98,7 @@ router.put('/profile', verifyToken, checkRole(['driver']), uploadDriverDocs, han
  *       200:
  *         description: Location updated successfully
  */
-router.post('/location', verifyToken, checkRole(['driver']), generalLimiter, DriverController.updateLocation);
+router.post('/location', verifyToken, checkRole(['driver']), createGeneralLimiter, DriverController.updateLocation);
 
 /**
  * @swagger

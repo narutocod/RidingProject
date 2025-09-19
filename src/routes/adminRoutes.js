@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const AdminController = require('../controllers/adminController');
 const { verifyToken, checkRole } = require('../middleware/auth');
-const { generalLimiter } = require('../middleware/rateLimiter');
 
 /**
  * @swagger

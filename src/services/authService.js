@@ -1,10 +1,12 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { Op } = require('sequelize');
-const { User, Rider, Driver, Wallet } = require('../../models');
+const { User, Rider, Driver, Wallet } = require('../models');
 const { getRedisClient } = require('../config/redis');
 const { generateOTP, formatPhoneNumber } = require('../utils/helpers');
 const logger = require('../utils/logger');
+const config = require('../config/appConfig');
+
 
 class AuthService {
   /**
@@ -44,7 +46,7 @@ class AuthService {
       // Generate OTP for verification
       const otp = generateOTP();
       const redis = getRedisClient();
-      await redis.setEx(`otp_${phone}`, process.env.otpExpiryTime / 1000, otp);
+      await redis.setEx(`otp_${phone}`, config.otpExpiryTime / 1000, otp);
 
       logger.info(`User registered: ${user.id} (${role})`);
 
@@ -98,7 +100,7 @@ class AuthService {
         // Generate new OTP
         const otp = generateOTP();
         const redis = getRedisClient();
-        await redis.setEx(`otp_${phone}`, process.env.otpExpiryTime / 1000, otp);
+        await redis.setEx(`otp_${phone}`, config.otpExpiryTime / 1000, otp);
 
         return {
           requiresVerification: true,
@@ -113,8 +115,8 @@ class AuthService {
           phone: user.phone,
           role: user.role
         },
-        process.env.jwtSecret,
-        { expiresIn: process.env.jwtExpiresIn }
+        config.jwtSecret,
+        { expiresIn: config.jwtExpiresIn }
       );
 
       // Update last login
@@ -170,8 +172,8 @@ class AuthService {
           phone: user.phone,
           role: user.role
         },
-        process.env.jwtSecret,
-        { expiresIn: process.env.jwtExpiresIn }
+        config.jwtSecret,
+        { expiresIn: config.jwtExpiresIn }
       );
 
       logger.info(`User verified: ${user.id}`);
@@ -204,7 +206,7 @@ class AuthService {
 
       const otp = generateOTP();
       const redis = getRedisClient();
-      await redis.setEx(`otp_${phone}`, process.env.otpExpiryTime / 1000, otp);
+      await redis.setEx(`otp_${phone}`, config.otpExpiryTime / 1000, otp);
 
       logger.info(`OTP resent for user: ${user.id}`);
 

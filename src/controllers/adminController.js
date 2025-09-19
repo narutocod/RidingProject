@@ -1,4 +1,4 @@
-const { User, Driver, Rider, Ride, Payment, Vehicle } = require('../../models');
+const { User, Driver, Rider, Ride, Payment, Vehicle } = require('../models');
 const { Op } = require('sequelize');
 const ApiResponse = require('../utils/response');
 const { paginate } = require('../utils/helpers');

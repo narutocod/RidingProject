@@ -7,15 +7,18 @@ const http = require('http');
 const socketIo = require('socket.io');
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
+const config = require('./config/appConfig');
+const db = require('./models');
+const { exec } = require('child_process');
+const path = require('path');
 
 // Import configurations
-// const { connectRedis } = require('./config/redis');
+const { connectRedis } = require('./config/redis');
 const logger = require('./utils/logger');
 
 // Import middleware
 const { errorHandler, notFound } = require('./middleware/errorHandler');
-const { generalLimiter } = require('./middleware/rateLimiter');
-
+const { createGeneralLimiter } = require('./middleware/rateLimiter');
 // Import routes
 const authRoutes = require('./routes/authRoutes');
 const rideRoutes = require('./routes/rideRoutes');
@@ -23,9 +26,6 @@ const driverRoutes = require('./routes/driverRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 const ratingRoutes = require('./routes/ratingRoutes');
 const adminRoutes = require('./routes/adminRoutes');
-
-// Import models to initialize database
-const db = require('./models');
 
 // Import services
 const NotificationService = require('./services/notificationService');
@@ -37,7 +37,7 @@ const server = http.createServer(app);
 // Socket.IO setup
 // const io = socketIo(server, {
 //   cors: {
-//     origin: process.env.FRONTEND_URL || "*",
+//     origin: config.FRONTEND_URL || "*",
 //     methods: ["GET", "POST"],
 //     credentials: true
 //   },
@@ -59,7 +59,7 @@ const server = http.createServer(app);
 //     },
 //     servers: [
 //       {
-//         url: `http://localhost:${process.env.port}`,
+//         url: `http://localhost:${config.port}`,
 //         description: 'Development server'
 //       }
 //     ],
@@ -85,8 +85,6 @@ app.use(compression());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Rate limiting
-app.use('/api/', generalLimiter);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -94,20 +92,19 @@ app.get('/health', (req, res) => {
     status: 'OK',
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
-    environment: process.env.nodeEnv,
-    version: process.env.npm_package_version || '1.0.0'
+    environment: config.nodeEnv,
+    version: config.npm_package_version || '1.0.0'
   });
 });
 
 // API Documentation
-app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(specs, {
-  explorer: true,
-  customCss: '.swagger-ui .topbar { display: none }',
-  customSiteTitle: 'RideShare API Documentation'
-}));
-
+// app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(specs, {
+//   explorer: true,
+//   customCss: '.swagger-ui .topbar { display: none }',
+//   customSiteTitle: 'RideShare API Documentation'
+// }));
 // Serve uploaded files
-app.use('/uploads', express.static(process.env.uploadDir));
+app.use('/uploads', express.static(config.uploadDir));
 
 // API Routes
 app.use('/api/auth', authRoutes);
@@ -197,7 +194,6 @@ app.use(notFound);
 
 // Global error handler
 app.use(errorHandler);
-
 // Graceful shutdown
 process.on('SIGTERM', async () => {
   logger.info('SIGTERM received, shutting down gracefully');
@@ -234,28 +230,67 @@ process.on('uncaughtException', (error) => {
   process.exit(1);
 });
 
+
+
+function runMigrationCLI() {
+  return new Promise((resolve, reject) => {
+    exec('npx sequelize-cli db:migrate', (error, stdout, stderr) => {
+      if (error) reject(error);
+      else resolve(stdout);
+    });
+  });
+}
+
+function runSeederCLI() {
+  return new Promise((resolve, reject) => {
+    exec('npx sequelize-cli db:seed:all', (error, stdout, stderr) => {
+      if (error) reject(error);
+      else resolve(stdout);
+    });
+  });
+}
+
+async function runMigrationsAndSeeders() {
+  try {
+    const migrationOutput = await runMigrationCLI();
+    logger.info(migrationOutput);
+
+    const seederOutput = await runSeederCLI();
+    logger.info(seederOutput);
+
+    logger.info('Migrations and seeders completed successfully');
+  } catch (err) {
+    logger.error('Error running migrations or seeders:', err);
+    process.exit(1);
+  }
+}
+
+
 // Initialize application
 async function initializeApp() {
   try {
+    await db.sequelize.authenticate();
+    logger.info('✅ Database connected successfully');
+    await runMigrationsAndSeeders()
     // Connect to Redis
-    // await connectRedis();
-    // logger.info('Redis connected successfully');
+    await connectRedis();
+    logger.info('Redis connected successfully');
+    // Rate limiting
+    app.use('/api/', createGeneralLimiter);
 
-    // // Test database connection
-    // await db.sequelize.authenticate();
-    // logger.info('Database connected successfully');
+    await runMigrationsAndSeeders();
 
     // // Initialize notification queue processors
     // NotificationService.setupQueueProcessors();
     // logger.info('Notification services initialized');
 
     // Start server
-    const PORT = process.env.port;
+    const PORT = config.port;
     server.listen(PORT, () => {
       logger.info(`🚀 RideShare API Server running on port ${PORT}`);
       logger.info(`📚 API Documentation: http://localhost:${PORT}/api/docs`);
       logger.info(`🏥 Health Check: http://localhost:${PORT}/health`);
-      logger.info(`🌍 Environment: ${process.env.nodeEnv}`);
+      logger.info(`🌍 Environment: ${config.nodeEnv}`);
     });
 
   } catch (error) {
@@ -267,4 +302,5 @@ async function initializeApp() {
 // Start the application
 initializeApp();
 
-module.exports = { app, server, io };
+// module.exports = { app, server, io };
+module.exports = { app, server };

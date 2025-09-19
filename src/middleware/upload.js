@@ -3,24 +3,26 @@ const path = require('path');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
 const ApiResponse = require('../utils/response');
+const config = require('../config/appConfig');
+
 
 // Ensure upload directory exists
-if (!fs.existsSync(process.env.uploadDir)) {
-  fs.mkdirSync(process.env.uploadDir, { recursive: true });
+if (!fs.existsSync(config.uploadDir)) {
+  fs.mkdirSync(config.uploadDir, { recursive: true });
 }
 
 // Configure storage
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    let uploadPath = process.env.uploadDir;
+    let uploadPath = config.uploadDir;
 
     // Create subdirectories based on file type
     if (file.fieldname.includes('license')) {
-      uploadPath = path.join(process.env.uploadDir, 'licenses');
+      uploadPath = path.join(config.uploadDir, 'licenses');
     } else if (file.fieldname.includes('registration')) {
-      uploadPath = path.join(process.env.uploadDir, 'registrations');
+      uploadPath = path.join(config.uploadDir, 'registrations');
     } else if (file.fieldname.includes('profile')) {
-      uploadPath = path.join(process.env.uploadDir, 'profiles');
+      uploadPath = path.join(config.uploadDir, 'profiles');
     }
 
     // Ensure directory exists
@@ -59,7 +61,7 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({
   storage: storage,
   limits: {
-    fileSize: process.env.maxFileSize, // 5MB
+    fileSize: config.maxFileSize, // 5MB
     files: 5 // Maximum 5 files
   },
   fileFilter: fileFilter

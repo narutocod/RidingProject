@@ -2,7 +2,6 @@ const AuthService = require('../services/authService');
 const ApiResponse = require('../utils/response');
 const { userRegistrationSchema, userLoginSchema, otpVerificationSchema } = require('../utils/validators');
 const logger = require('../utils/logger');
-
 class AuthController {
   /**
    * Register new user

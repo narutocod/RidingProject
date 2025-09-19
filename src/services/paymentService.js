@@ -1,5 +1,5 @@
 const { Op } = require('sequelize');
-const { Payment, Ride, User, Wallet, WalletTransaction } = require('../../models');
+const { Payment, Ride, User, Wallet, WalletTransaction } = require('../models');
 const { v4: uuidv4 } = require('uuid');
 const logger = require('../utils/logger');
 

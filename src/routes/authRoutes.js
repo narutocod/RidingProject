@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const AuthController = require('../controllers/authController');
 const { verifyToken, checkRole } = require('../middleware/auth');
-const { authLimiter, otpLimiter } = require('../middleware/rateLimiter');
+const { createAuthLimiter, createOtpLimiter } = require('../middleware/rateLimiter');
 
 /**
  * @swagger
@@ -10,7 +10,6 @@ const { authLimiter, otpLimiter } = require('../middleware/rateLimiter');
  *   name: Authentication
  *   description: User authentication endpoints
  */
-
 /**
  * @swagger
  * /api/auth/register:
@@ -44,7 +43,7 @@ const { authLimiter, otpLimiter } = require('../middleware/rateLimiter');
  *       400:
  *         description: Validation error or user already exists
  */
-router.post('/register', authLimiter, AuthController.register);
+router.post('/register', createAuthLimiter, AuthController.register);
 
 /**
  * @swagger
@@ -72,7 +71,7 @@ router.post('/register', authLimiter, AuthController.register);
  *       401:
  *         description: Invalid credentials
  */
-router.post('/login', authLimiter, AuthController.login);
+router.post('/login', createAuthLimiter, AuthController.login);
 
 /**
  * @swagger
@@ -100,7 +99,7 @@ router.post('/login', authLimiter, AuthController.login);
  *       400:
  *         description: Invalid or expired OTP
  */
-router.post('/verify-otp', otpLimiter, AuthController.verifyOTP);
+router.post('/verify-otp', createOtpLimiter, AuthController.verifyOTP);
 
 /**
  * @swagger
@@ -123,7 +122,7 @@ router.post('/verify-otp', otpLimiter, AuthController.verifyOTP);
  *       200:
  *         description: OTP sent successfully
  */
-router.post('/resend-otp', otpLimiter, AuthController.resendOTP);
+router.post('/resend-otp', createOtpLimiter, AuthController.resendOTP);
 
 /**
  * @swagger

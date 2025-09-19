@@ -2,8 +2,7 @@ const express = require('express');
 const router = express.Router();
 const RideController = require('../controllers/rideController');
 const { verifyToken, checkRole } = require('../middleware/auth');
-const { generalLimiter } = require('../middleware/rateLimiter');
-
+const { createGeneralLimiter } = require('../middleware/rateLimiter');
 /**
  * @swagger
  * tags:
@@ -57,7 +56,7 @@ const { generalLimiter } = require('../middleware/rateLimiter');
  *       400:
  *         description: Validation error
  */
-router.post('/book', verifyToken, checkRole(['rider']), generalLimiter, RideController.bookRide);
+router.post('/book', verifyToken, checkRole(['rider']), createGeneralLimiter, RideController.bookRide);
 
 /**
  * @swagger
