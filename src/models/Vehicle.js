@@ -79,7 +79,17 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       defaultValue: 4,
       field: 'seating_capacity'
-    }
+    },
+    createdAt:{
+      type: DataTypes.DATE,
+      defaultValue: sequelize.NOW,
+      allowNull: true
+    },
+    updatedAt:{
+      type: DataTypes.DATE,
+      defaultValue: sequelize.NOW,
+      allowNull: true
+    },
   }, {
     tableName: 'vehicles',
     timestamps: true,

@@ -40,7 +40,7 @@ const { createGeneralLimiter } = require('../middleware/rateLimiter');
  *       400:
  *         description: Invalid request or insufficient funds
  */
-router.post('/ride', verifyToken, checkRole(['rider']), createGeneralLimiter, PaymentController.processRidePayment);
+router.post('/ride', verifyToken, checkRole(['rider']), createGeneralLimiter(), PaymentController.processRidePayment);
 
 /**
  * @swagger
@@ -71,7 +71,7 @@ router.post('/ride', verifyToken, checkRole(['rider']), createGeneralLimiter, Pa
  *       200:
  *         description: Money added to wallet successfully
  */
-router.post('/wallet/add-money', verifyToken, createGeneralLimiter, PaymentController.addMoneyToWallet);
+router.post('/wallet/add-money', verifyToken, createGeneralLimiter(), PaymentController.addMoneyToWallet);
 
 /**
  * @swagger

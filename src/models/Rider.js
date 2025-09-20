@@ -38,7 +38,17 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DECIMAL(3, 2),
       defaultValue: 5.00,
       field: 'average_rating'
-    }
+    },
+    createdAt:{
+      type: DataTypes.DATE,
+      defaultValue: sequelize.NOW,
+      allowNull: true
+    },
+    updatedAt:{
+      type: DataTypes.DATE,
+      defaultValue: sequelize.NOW,
+      allowNull: true
+    },
   }, {
     tableName: 'riders',
     timestamps: true,

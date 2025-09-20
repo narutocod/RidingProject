@@ -24,11 +24,11 @@ class PaymentService {
       });
 
       if (!ride) {
-        throw new Error('Ride not found or not completed');
+        throw new Error('Ride not found or not completed',404);
       }
 
       if (ride.riderId !== userId) {
-        throw new Error('Not authorized to make payment for this ride');
+        throw new Error('Not authorized to make payment for this ride',403);
       }
 
       // Check if payment already exists
@@ -37,7 +37,7 @@ class PaymentService {
       });
 
       if (existingPayment) {
-        throw new Error('Payment already processed for this ride');
+        throw new Error('Payment already processed for this ride',400);
       }
 
       let paymentResult;
@@ -54,7 +54,7 @@ class PaymentService {
           paymentResult = await this.processCashPayment(ride);
           break;
         default:
-          throw new Error('Invalid payment method');
+          throw new Error('Invalid payment method',400);
       }
 
       // Create payment record
@@ -72,7 +72,7 @@ class PaymentService {
 
       // Update ride payment status
       await ride.update({
-        paymentStatus: paymentResult.status
+        paymentStatus: "paid"
       });
 
       // If payment successful, credit driver's wallet
@@ -103,11 +103,11 @@ class PaymentService {
       const wallet = await Wallet.findOne({ where: { userId } });
 
       if (!wallet) {
-        throw new Error('Wallet not found');
+        throw new Error('Wallet not found',404);
       }
 
       if (parseFloat(wallet.balance) < parseFloat(ride.actualFare)) {
-        throw new Error('Insufficient wallet balance');
+        throw new Error('Insufficient wallet balance',400);
       }
 
       // Debit from wallet

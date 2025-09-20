@@ -180,18 +180,4 @@ router.post('/change-password', verifyToken, AuthController.changePassword);
  */
 router.get('/profile', verifyToken, AuthController.getProfile);
 
-/**
- * @swagger
- * /api/auth/refresh-token:
- *   post:
- *     summary: Refresh token
- *     tags: [Authentication]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Token refreshed successfully
- */
-// router.post('/refresh-token', verifyToken, AuthController.refreshToken);
-
 module.exports = router;

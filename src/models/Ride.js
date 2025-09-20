@@ -117,7 +117,17 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.ENUM('rider', 'driver', 'admin'),
       allowNull: true,
       field: 'cancelled_by'
-    }
+    },
+    createdAt:{
+      type: DataTypes.DATE,
+      defaultValue: sequelize.NOW,
+      allowNull: true
+    },
+    updatedAt:{
+      type: DataTypes.DATE,
+      defaultValue: sequelize.NOW,
+      allowNull: true
+    },
   }, {
     tableName: 'rides',
     timestamps: true,

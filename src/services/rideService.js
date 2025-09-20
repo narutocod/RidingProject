@@ -22,7 +22,7 @@ class RideService {
         dropLocation.longitude
       );
 
-      const estimatedDuration = Math.round(estimatedDistance * 3 * 60); // Assuming 20 km/hr average speed
+      const estimatedDuration = Math.round(estimatedDistance / 20 * 60); // Distance / speed * 60
       const estimatedFare = calculateFare(estimatedDistance, estimatedDuration, rideType);
 
       // Create ride
@@ -158,7 +158,7 @@ class RideService {
       });
 
       if (!ride) {
-        throw new Error('Ride not found or already accepted');
+        throw new Error('Ride not found or already accepted',404);
       }
 
       // Check if driver is available
@@ -171,6 +171,11 @@ class RideService {
         },
         include: [
           {
+            model: User,
+            as: 'user',
+            attributes: ['id', 'name', 'phone', 'email', 'profilePicture']
+          },
+          {
             model: Vehicle,
             as: 'vehicles',
             where: { isActive: true, isVerified: true }
@@ -179,7 +184,7 @@ class RideService {
       });
 
       if (!driver) {
-        throw new Error('Driver not available');
+        throw new Error('Driver not available',400);
       }
 
       // Update ride status
@@ -235,16 +240,8 @@ class RideService {
   static async startRide(driverId, rideId) {
     try {
       const ride = await Ride.findOne({
-        where: { rideId, status: 'accepted' },
-        include: [
-          {
-            model: User,
-            as: 'driver',
-            where: { id: driverId }
-          }
-        ]
+        where: { rideId, status: 'accepted' }
       });
-
       if (!ride) {
         throw new Error('Ride not found or not in correct status');
       }
@@ -285,14 +282,7 @@ class RideService {
 
     try {
       const ride = await Ride.findOne({
-        where: { rideId, status: 'started' },
-        include: [
-          {
-            model: User,
-            as: 'driver',
-            where: { id: driverId }
-          }
-        ]
+        where: { rideId, status: 'started' }
       });
 
       if (!ride) {
@@ -429,7 +419,7 @@ class RideService {
   static async getRideDetails(rideId, userId) {
     try {
       const ride = await Ride.findOne({
-        where: { rideId },
+        where: { id:rideId },
         include: [
           {
             model: User,

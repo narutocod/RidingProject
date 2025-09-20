@@ -46,7 +46,17 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
       field: 'balance_after'
-    }
+    },
+    createdAt:{
+      type: DataTypes.DATE,
+      defaultValue: sequelize.NOW,
+      allowNull: true
+    },
+    updatedAt:{
+      type: DataTypes.DATE,
+      defaultValue: sequelize.NOW,
+      allowNull: true
+    },
   }, {
     tableName: 'wallet_transactions',
     timestamps: true,

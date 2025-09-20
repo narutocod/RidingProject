@@ -238,50 +238,6 @@ class RideController {
   }
 
   /**
-   * Get user's ride history
-   */
-  static async getRideHistory(req, res) {
-    try {
-      const userId = req.user.userId;
-      const { page = 1, limit = 20, status, startDate, endDate } = req.query;
-
-      // This would need to be implemented in RideService
-      // For now, return a placeholder response
-      const pagination = paginate(page, limit);
-
-      ApiResponse.success(res, {
-        rides: [],
-        pagination: {
-          ...pagination,
-          total: 0,
-          totalPages: 0
-        }
-      }, 'Ride history retrieved successfully');
-    } catch (error) {
-      logger.error('Get ride history controller error:', error);
-      ApiResponse.error(res, 'Failed to retrieve ride history');
-    }
-  }
-
-  /**
-   * Get current ride status
-   */
-  static async getCurrentRide(req, res) {
-    try {
-      const userId = req.user.userId;
-      const userRole = req.user.role;
-
-      // This would need to be implemented in RideService
-      // Find user's current active ride
-
-      ApiResponse.success(res, null, 'No active ride found');
-    } catch (error) {
-      logger.error('Get current ride controller error:', error);
-      ApiResponse.error(res, 'Failed to retrieve current ride');
-    }
-  }
-
-  /**
    * Estimate ride fare
    */
   static async estimateFare(req, res) {
@@ -318,32 +274,6 @@ class RideController {
     } catch (error) {
       logger.error('Estimate fare controller error:', error);
       ApiResponse.error(res, 'Failed to estimate fare');
-    }
-  }
-
-  /**
-   * Get nearby drivers (for debugging/admin)
-   */
-  static async getNearbyDrivers(req, res) {
-    try {
-      const { latitude, longitude, radius = 10 } = req.query;
-
-      if (!latitude || !longitude) {
-        return ApiResponse.error(res, 'Latitude and longitude are required', 400);
-      }
-
-      const location = {
-        latitude: parseFloat(latitude),
-        longitude: parseFloat(longitude)
-      };
-
-      const DriverService = require('../services/driverService');
-      const drivers = await DriverService.getNearbyDrivers(location, parseInt(radius));
-
-      ApiResponse.success(res, drivers, 'Nearby drivers retrieved successfully');
-    } catch (error) {
-      logger.error('Get nearby drivers controller error:', error);
-      ApiResponse.error(res, 'Failed to retrieve nearby drivers');
     }
   }
 }

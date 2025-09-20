@@ -44,7 +44,7 @@ const { createGeneralLimiter } = require('../middleware/rateLimiter');
  *       400:
  *         description: Invalid request or already rated
  */
-router.post('/submit', verifyToken, checkRole(['rider', 'driver']), createGeneralLimiter, RatingController.submitRating);
+router.post('/submit', verifyToken, checkRole(['rider', 'driver']), createGeneralLimiter(), RatingController.submitRating);
 
 /**
  * @swagger
@@ -154,44 +154,5 @@ router.get('/ride/:rideId', verifyToken, RatingController.getRideRatings);
  */
 router.get('/top-drivers', RatingController.getTopRatedDrivers);
 
-/**
- * @swagger
- * /api/ratings/my-reviews:
- *   get:
- *     summary: Get recent reviews for current user
- *     tags: [Ratings]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           default: 10
- *     responses:
- *       200:
- *         description: Recent reviews retrieved successfully
- */
-router.get('/my-reviews', verifyToken, RatingController.getMyRecentReviews);
-
-/**
- * @swagger
- * /api/ratings/can-rate/{rideId}:
- *   get:
- *     summary: Check if user can rate a ride
- *     tags: [Ratings]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: rideId
- *         required: true
- *         schema:
- *           type: integer
- *     responses:
- *       200:
- *         description: Rating eligibility checked successfully
- */
-router.get('/can-rate/:rideId', verifyToken, RatingController.canRateRide);
 
 module.exports = router;

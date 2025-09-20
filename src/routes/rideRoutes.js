@@ -56,7 +56,7 @@ const { createGeneralLimiter } = require('../middleware/rateLimiter');
  *       400:
  *         description: Validation error
  */
-router.post('/book', verifyToken, checkRole(['rider']), createGeneralLimiter, RideController.bookRide);
+router.post('/book', verifyToken, checkRole(['rider']), createGeneralLimiter(), RideController.bookRide);
 
 /**
  * @swagger
@@ -220,50 +220,6 @@ router.post('/:rideId/track', verifyToken, checkRole(['driver']), RideController
 
 /**
  * @swagger
- * /api/rides/history:
- *   get:
- *     summary: Get user's ride history
- *     tags: [Rides]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           default: 1
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           default: 20
- *       - in: query
- *         name: status
- *         schema:
- *           type: string
- *           enum: [requested, accepted, started, completed, cancelled]
- *     responses:
- *       200:
- *         description: Ride history retrieved successfully
- */
-router.get('/history', verifyToken, RideController.getRideHistory);
-
-/**
- * @swagger
- * /api/rides/current:
- *   get:
- *     summary: Get current active ride
- *     tags: [Rides]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Current ride retrieved successfully
- */
-router.get('/current', verifyToken, RideController.getCurrentRide);
-
-/**
- * @swagger
  * /api/rides/estimate-fare:
  *   post:
  *     summary: Estimate ride fare
@@ -303,35 +259,5 @@ router.get('/current', verifyToken, RideController.getCurrentRide);
  *         description: Fare estimated successfully
  */
 router.post('/estimate-fare', verifyToken, RideController.estimateFare);
-
-/**
- * @swagger
- * /api/rides/nearby-drivers:
- *   get:
- *     summary: Get nearby drivers (for debugging/admin)
- *     tags: [Rides]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: latitude
- *         required: true
- *         schema:
- *           type: number
- *       - in: query
- *         name: longitude
- *         required: true
- *         schema:
- *           type: number
- *       - in: query
- *         name: radius
- *         schema:
- *           type: number
- *           default: 10
- *     responses:
- *       200:
- *         description: Nearby drivers retrieved successfully
- */
-router.get('/nearby-drivers', verifyToken, RideController.getNearbyDrivers);
 
 module.exports = router;

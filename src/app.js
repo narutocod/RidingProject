@@ -44,39 +44,35 @@ const server = http.createServer(app);
 //   transports: ['websocket', 'polling']
 // });
 
-// // Swagger configuration
-// const swaggerOptions = {
-//   definition: {
-//     openapi: '3.0.0',
-//     info: {
-//       title: 'RideShare API',
-//       version: '1.0.0',
-//       description: 'A comprehensive ride-hailing backend API built with Node.js, Express, and PostgreSQL',
-//       contact: {
-//         name: 'RideShare Team',
-//         email: 'dev@rideshare.com'
-//       }
-//     },
-//     servers: [
-//       {
-//         url: `http://localhost:${config.port}`,
-//         description: 'Development server'
-//       }
-//     ],
-//     components: {
-//       securitySchemes: {
-//         bearerAuth: {
-//           type: 'http',
-//           scheme: 'bearer',
-//           bearerFormat: 'JWT'
-//         }
-//       }
-//     }
-//   },
-//   apis: ['./src/routes/*.js'], // Path to the API docs
-// };
+// Swagger configuration
+const swaggerOptions = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'RideShare API',
+      version: '1.0.0',
+      description: 'A comprehensive ride-hailing backend API built with Node.js, Express, and PostgreSQL'
+    },
+    servers: [
+      {
+        url: `http://localhost:${config.port}`,
+        description: 'Development server'
+      }
+    ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT'
+        }
+      }
+    }
+  },
+  apis: ['./src/routes/*.js'], // Path to the API docs
+};
 
-// const specs = swaggerJsdoc(swaggerOptions);
+const specs = swaggerJsdoc(swaggerOptions);
 
 // Middleware setup
 app.use(helmet());
@@ -98,11 +94,7 @@ app.get('/health', (req, res) => {
 });
 
 // API Documentation
-// app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(specs, {
-//   explorer: true,
-//   customCss: '.swagger-ui .topbar { display: none }',
-//   customSiteTitle: 'RideShare API Documentation'
-// }));
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(specs));
 // Serve uploaded files
 app.use('/uploads', express.static(config.uploadDir));
 
@@ -276,9 +268,8 @@ async function initializeApp() {
     await connectRedis();
     logger.info('Redis connected successfully');
     // Rate limiting
-    app.use('/api/', createGeneralLimiter);
+    app.use('/api/', createGeneralLimiter());
 
-    await runMigrationsAndSeeders();
 
     // // Initialize notification queue processors
     // NotificationService.setupQueueProcessors();

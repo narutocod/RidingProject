@@ -48,7 +48,17 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.ENUM('rider_to_driver', 'driver_to_rider'),
       allowNull: false,
       field: 'rating_type'
-    }
+    },
+    createdAt:{
+        type: DataTypes.DATE,
+        defaultValue: sequelize.NOW,
+        allowNull: true
+    },
+    updatedAt:{
+        type: DataTypes.DATE,
+        defaultValue: sequelize.NOW,
+        allowNull: true
+    },
   }, {
     tableName: 'ratings',
     timestamps: true,

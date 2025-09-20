@@ -346,65 +346,6 @@ class DriverService {
       throw error;
     }
   }
-
-  /**
-   * Get nearby drivers for admin/debugging
-   */
-  static async getNearbyDrivers(location, radiusKm = 10) {
-    try {
-      const drivers = await Driver.findAll({
-        where: {
-          isOnline: true,
-          isAvailable: true,
-          currentLocation: { [Op.not]: null }
-        },
-        include: [
-          {
-            model: User,
-            as: 'user',
-            attributes: ['name', 'phone']
-          },
-          {
-            model: Vehicle,
-            as: 'vehicles',
-            where: { isActive: true }
-          }
-        ]
-      });
-
-      // Filter by distance
-      const nearbyDrivers = drivers.filter(driver => {
-        if (!driver.currentLocation) return false;
-
-        const distance = calculateDistance(
-          location.latitude,
-          location.longitude,
-          driver.currentLocation.latitude,
-          driver.currentLocation.longitude
-        );
-
-        return distance <= radiusKm;
-      });
-
-      // Add distance to each driver
-      nearbyDrivers.forEach(driver => {
-        driver.dataValues.distance = calculateDistance(
-          location.latitude,
-          location.longitude,
-          driver.currentLocation.latitude,
-          driver.currentLocation.longitude
-        );
-      });
-
-      // Sort by distance
-      nearbyDrivers.sort((a, b) => a.dataValues.distance - b.dataValues.distance);
-
-      return nearbyDrivers;
-    } catch (error) {
-      logger.error('Get nearby drivers error:', error);
-      throw error;
-    }
-  }
 }
 
 module.exports = DriverService;

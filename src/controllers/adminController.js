@@ -356,7 +356,7 @@ class AdminController {
 
       const user = await User.findByPk(userId);
       if (!user) {
-        return ApiResponse.notFound(res, 'User not found');
+        return ApiResponse.notFound(res, 'User not found',404);
       }
 
       await user.update({ isActive });
