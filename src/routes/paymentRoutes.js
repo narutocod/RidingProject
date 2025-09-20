@@ -144,26 +144,6 @@ router.get('/wallet/transactions', verifyToken, PaymentController.getWalletTrans
 
 /**
  * @swagger
- * /api/payments/{paymentId}:
- *   get:
- *     summary: Get payment details
- *     tags: [Payments]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: paymentId
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Payment details retrieved successfully
- */
-router.get('/:paymentId', verifyToken, PaymentController.getPaymentDetails);
-
-/**
- * @swagger
  * /api/payments/refund:
  *   post:
  *     summary: Process refund (Admin only)

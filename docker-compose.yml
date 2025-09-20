@@ -1,63 +1,143 @@
+# 🐳 Docker Compose Setup for RideShare Backend
+
 version: '3.8'
 
 services:
-  app:
-    build: .
-    ports:
-      - "3000:3000"
-    environment:
-      - NODE_ENV=development
-      - DB_HOST=postgres
-      - REDIS_HOST=redis
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_started
-    volumes:
-      - ./src/uploads:/app/src/uploads
-    networks:
-      - rideshare-network
-
+  # PostgreSQL Database
   postgres:
-    image: postgres:15-alpine
+    image: postgres:15
+    container_name: rideshare_postgres
+    restart: unless-stopped
     environment:
       POSTGRES_DB: rideshare_db
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+      POSTGRES_PASSWORD: postgres123
+      POSTGRES_HOST_AUTH_METHOD: trust
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    networks:
+      - rideshare_network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
-    networks:
-      - rideshare-network
 
+  # Redis Cache
   redis:
     image: redis:7-alpine
+    container_name: rideshare_redis
+    restart: unless-stopped
     ports:
       - "6379:6379"
+    command: redis-server --appendonly yes --requirepass redis123
     volumes:
       - redis_data:/data
-    command: redis-server --appendonly yes
     networks:
-      - rideshare-network
+      - rideshare_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
 
+  # RideShare Backend API
+  rideshare_api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rideshare_backend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      # Server Configuration
+      NODE_ENV: production
+      PORT: 3000
+      
+      # Database Configuration
+      DB_HOST: postgres
+      DB_NAME: rideshare_db
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres123
+      DB_PORT: 5432
+      
+      # Redis Configuration
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: redis123
+      
+      # JWT Configuration
+      JWT_SECRET: rideshare-super-secure-jwt-secret-key-2024
+      JWT_EXPIRES_IN: 7d
+      
+      # Upload Configuration
+      UPLOAD_DIR: uploads
+      MAX_FILE_SIZE: 5242880
+      
+      # API Configuration
+      FRONTEND_URL: http://localhost:3000
+      
+      # Auto Migration/Seeder (optional)
+      RUN_MIGRATIONS: true
+      RUN_SEEDERS: true
+    volumes:
+      - ./src:/app/src
+      - ./uploads:/app/uploads
+      - ./logs:/app/logs
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - rideshare_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Adminer (Database Management UI) - Optional
   adminer:
-    image: adminer
+    image: adminer:4
+    container_name: rideshare_adminer
+    restart: unless-stopped
     ports:
       - "8080:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+    depends_on:
+      - postgres
     networks:
-      - rideshare-network
+      - rideshare_network
 
+  # Redis Commander (Redis Management UI) - Optional
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: rideshare_redis_ui
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      REDIS_HOSTS: redis:redis:6379:0:redis123
+    depends_on:
+      - redis
+    networks:
+      - rideshare_network
+
+# Networks
+networks:
+  rideshare_network:
+    driver: bridge
+
+# Volumes for persistent data
 volumes:
   postgres_data:
+    driver: local
   redis_data:
-
-networks:
-  rideshare-network:
-    driver: bridge
+    driver: local

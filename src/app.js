@@ -35,14 +35,14 @@ const app = express();
 const server = http.createServer(app);
 
 // Socket.IO setup
-// const io = socketIo(server, {
-//   cors: {
-//     origin: config.FRONTEND_URL || "*",
-//     methods: ["GET", "POST"],
-//     credentials: true
-//   },
-//   transports: ['websocket', 'polling']
-// });
+const io = socketIo(server, {
+  cors: {
+    origin: config.FRONTEND_URL || "*",
+    methods: ["GET", "POST"],
+    credentials: true
+  },
+  transports: ['websocket', 'polling']
+});
 
 // Swagger configuration
 const swaggerOptions = {
@@ -125,61 +125,61 @@ app.get('/', (req, res) => {
 });
 
 // Socket.IO connection handling
-// io.on('connection', (socket) => {
-//   logger.info(`Client connected: ${socket.id}`);
+io.on('connection', (socket) => {
+  logger.info(`Client connected: ${socket.id}`);
 
-//   // Join room for ride updates
-//   socket.on('join_ride', (rideId) => {
-//     socket.join(`ride_${rideId}`);
-//     logger.info(`Client ${socket.id} joined ride room: ${rideId}`);
-//   });
+  // Join room for ride updates
+  socket.on('join_ride', (rideId) => {
+    socket.join(`ride_${rideId}`);
+    logger.info(`Client ${socket.id} joined ride room: ${rideId}`);
+  });
 
-//   // Leave ride room
-//   socket.on('leave_ride', (rideId) => {
-//     socket.leave(`ride_${rideId}`);
-//     logger.info(`Client ${socket.id} left ride room: ${rideId}`);
-//   });
+  // Leave ride room
+  socket.on('leave_ride', (rideId) => {
+    socket.leave(`ride_${rideId}`);
+    logger.info(`Client ${socket.id} left ride room: ${rideId}`);
+  });
 
-//   // Handle driver location updates
-//   socket.on('driver_location_update', (data) => {
-//     const { rideId, location } = data;
-//     if (rideId && location) {
-//       // Broadcast location to ride participants
-//       socket.to(`ride_${rideId}`).emit('driver_location_update', {
-//         rideId,
-//         location,
-//         timestamp: new Date().toISOString()
-//       });
-//     }
-//   });
+  // Handle driver location updates
+  socket.on('driver_location_update', (data) => {
+    const { rideId, location } = data;
+    if (rideId && location) {
+      // Broadcast location to ride participants
+      socket.to(`ride_${rideId}`).emit('driver_location_update', {
+        rideId,
+        location,
+        timestamp: new Date().toISOString()
+      });
+    }
+  });
 
-//   // Handle ride status updates
-//   socket.on('ride_status_update', (data) => {
-//     const { rideId, status, message } = data;
-//     if (rideId && status) {
-//       // Broadcast status to ride participants
-//       io.to(`ride_${rideId}`).emit('ride_status_update', {
-//         rideId,
-//         status,
-//         message,
-//         timestamp: new Date().toISOString()
-//       });
-//     }
-//   });
+  // Handle ride status updates
+  socket.on('ride_status_update', (data) => {
+    const { rideId, status, message } = data;
+    if (rideId && status) {
+      // Broadcast status to ride participants
+      io.to(`ride_${rideId}`).emit('ride_status_update', {
+        rideId,
+        status,
+        message,
+        timestamp: new Date().toISOString()
+      });
+    }
+  });
 
-//   // Handle disconnection
-//   socket.on('disconnect', () => {
-//     logger.info(`Client disconnected: ${socket.id}`);
-//   });
+  // Handle disconnection
+  socket.on('disconnect', () => {
+    logger.info(`Client disconnected: ${socket.id}`);
+  });
 
-//   // Handle connection errors
-//   socket.on('error', (error) => {
-//     logger.error(`Socket error for ${socket.id}:`, error);
-//   });
-// });
+  // Handle connection errors
+  socket.on('error', (error) => {
+    logger.error(`Socket error for ${socket.id}:`, error);
+  });
+});
 
 // Make io accessible to other parts of the application
-// app.set('io', io);
+app.set('io', io);
 
 // 404 handler
 app.use(notFound);
@@ -272,8 +272,8 @@ async function initializeApp() {
 
 
     // // Initialize notification queue processors
-    // NotificationService.setupQueueProcessors();
-    // logger.info('Notification services initialized');
+    NotificationService.setupQueueProcessors();
+    logger.info('Notification services initialized');
 
     // Start server
     const PORT = config.port;
@@ -293,5 +293,4 @@ async function initializeApp() {
 // Start the application
 initializeApp();
 
-// module.exports = { app, server, io };
-module.exports = { app, server };
+module.exports = { app, server, io };
