@@ -1,28 +1,22 @@
+// rateLimiter.js
 const rateLimit = require("express-rate-limit");
 const { getRedisClient } = require("../config/redis");
 const config = require("../config/appConfig");
 
-/**
- * Redis store for rate limiting
- */
 class RedisStore {
   constructor(options = {}) {
-    this.client = getRedisClient();
-    if (!this.client) {
-      throw new Error("Redis client not initialized. Call connectRedis() first.");
-    }
+    const client = getRedisClient(); // runs only when limiter is created
+    this.client = client;
     this.prefix = options.prefix || "rl:";
-    this.expiry = options.expiry || 900; // 15 minutes default
+    this.expiry = options.expiry || 900;
   }
 
   async incr(key) {
     const redisKey = this.prefix + key;
     const current = await this.client.incr(redisKey);
-
     if (current === 1) {
       await this.client.expire(redisKey, this.expiry);
     }
-
     return {
       totalHits: current,
       timeToExpire: (await this.client.ttl(redisKey)) * 1000,
@@ -30,31 +24,34 @@ class RedisStore {
   }
 
   async decrement(key) {
-    const redisKey = this.prefix + key;
-    return await this.client.decr(redisKey);
+    return await this.client.decr(this.prefix + key);
   }
 
   async resetKey(key) {
-    const redisKey = this.prefix + key;
-    await this.client.del(redisKey);
+    await this.client.del(this.prefix + key);
   }
 }
 
-/**
- * Factory functions — create limiter *after* Redis is ready
- */
+// 🔑 Helper: pick correct store (Redis in prod, memory in dev/test)
+function getStore(options) {
+  if (process.env.NODE_ENV === "production") {
+    return new RedisStore(options);
+  }
+  return undefined; // default memory store
+}
+
 function createGeneralLimiter() {
   return rateLimit({
     windowMs: config.rateLimitWindow * 60 * 1000,
     max: config.rateLimitMaxRequests,
     message: {
       success: false,
-      message: "Too many requests from this IP, please try again later",
+      message: "Too many requests",
       retryAfter: config.rateLimitWindow * 60,
     },
     standardHeaders: true,
     legacyHeaders: false,
-    store: new RedisStore(),
+    store: getStore(),
   });
 }
 
@@ -64,12 +61,12 @@ function createAuthLimiter() {
     max: 5,
     message: {
       success: false,
-      message: "Too many authentication attempts, please try again later",
+      message: "Too many authentication attempts",
       retryAfter: 15 * 60,
     },
     standardHeaders: true,
     legacyHeaders: false,
-    store: new RedisStore({ prefix: "auth_rl:" }),
+    store: getStore({ prefix: "auth_rl:" }),
   });
 }
 
@@ -79,12 +76,12 @@ function createOtpLimiter() {
     max: 3,
     message: {
       success: false,
-      message: "Too many OTP requests, please wait a minute before trying again",
+      message: "Too many OTP requests",
       retryAfter: 60,
     },
     standardHeaders: true,
     legacyHeaders: false,
-    store: new RedisStore({ prefix: "otp_rl:" }),
+    store: getStore({ prefix: "otp_rl:" }),
   });
 }
 

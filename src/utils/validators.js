@@ -55,7 +55,11 @@ const vehicleDetailsSchema = Joi.object({
 // Location update validation
 const locationUpdateSchema = Joi.object({
   latitude: Joi.number().min(-90).max(90).required(),
-  longitude: Joi.number().min(-180).max(180).required()
+  longitude: Joi.number().min(-180).max(180).required(),
+  accuracy: Joi.number().precision(2).min(0).optional(),
+  heading: Joi.number().precision(2).min(0).optional(),
+  speed: Joi.number().precision(2).min(0).optional(),
+  address: Joi.string().max(500).optional(),
 });
 
 // Rating validation

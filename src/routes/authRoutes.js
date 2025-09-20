@@ -43,7 +43,7 @@ const { createAuthLimiter, createOtpLimiter } = require('../middleware/rateLimit
  *       400:
  *         description: Validation error or user already exists
  */
-router.post('/register', createAuthLimiter, AuthController.register);
+router.post('/register', createAuthLimiter(), AuthController.register);
 
 /**
  * @swagger
@@ -71,7 +71,7 @@ router.post('/register', createAuthLimiter, AuthController.register);
  *       401:
  *         description: Invalid credentials
  */
-router.post('/login', createAuthLimiter, AuthController.login);
+router.post('/login', createAuthLimiter(), AuthController.login);
 
 /**
  * @swagger
@@ -99,7 +99,7 @@ router.post('/login', createAuthLimiter, AuthController.login);
  *       400:
  *         description: Invalid or expired OTP
  */
-router.post('/verify-otp', createOtpLimiter, AuthController.verifyOTP);
+router.post('/verify-otp', createOtpLimiter(), AuthController.verifyOTP);
 
 /**
  * @swagger
@@ -122,7 +122,7 @@ router.post('/verify-otp', createOtpLimiter, AuthController.verifyOTP);
  *       200:
  *         description: OTP sent successfully
  */
-router.post('/resend-otp', createOtpLimiter, AuthController.resendOTP);
+router.post('/resend-otp', createOtpLimiter(), AuthController.resendOTP);
 
 /**
  * @swagger
@@ -192,6 +192,6 @@ router.get('/profile', verifyToken, AuthController.getProfile);
  *       200:
  *         description: Token refreshed successfully
  */
-router.post('/refresh-token', verifyToken, AuthController.refreshToken);
+// router.post('/refresh-token', verifyToken, AuthController.refreshToken);
 
 module.exports = router;

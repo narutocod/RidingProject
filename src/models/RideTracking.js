@@ -38,16 +38,11 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATE,
       allowNull: false,
       defaultValue: DataTypes.NOW
-    },
-    createdAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      field: 'created_at'
     }
   }, {
     tableName: 'ride_tracking',
     timestamps: false,
-    createdAt: 'created_at',
+    underscored: true,
     indexes: [
       {
         fields: ['ride_id', 'timestamp']

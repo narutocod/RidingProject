@@ -16,13 +16,13 @@ module.exports = (sequelize, DataTypes) => {
     },
     licenseNumber: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
       unique: true,
       field: 'license_number'
     },
     licenseExpiry: {
       type: DataTypes.DATE,
-      allowNull: false,
+      allowNull: true,
       field: 'license_expiry'
     },
     driverLicensePath: {
@@ -69,22 +69,11 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
       field: 'documents_verified'
-    },
-    createdAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      field: 'created_at'
-    },
-    updatedAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      field: 'updated_at'
     }
   }, {
     tableName: 'drivers',
     timestamps: true,
-    createdAt: 'created_at',
-    updatedAt: 'updated_at'
+    underscored: true
   });
 
   Driver.associate = (models) => {

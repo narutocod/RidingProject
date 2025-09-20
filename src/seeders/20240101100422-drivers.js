@@ -1,14 +1,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    // ✅ Check if drivers already exist
-    const existingDriver = await queryInterface.rawSelect("drivers", {}, ["id"]);
-
-    if (existingDriver) {
-      return;
-    }
-
-    // ✅ Get user IDs for drivers
+    // Get user IDs for drivers
     const mikeUserId = await queryInterface.rawSelect(
       "users",
       { where: { email: "mike.driver@example.com" } },
@@ -33,14 +26,19 @@ module.exports = {
       ["id"]
     );
 
-    if (!mikeUserId || !sarahUserId || !alexUserId || !davidUserId) {
-      console.warn("❌ Required driver users not found, skipping driver seeder");
+    if (!mikeUserId && !sarahUserId && !alexUserId && !davidUserId) {
+      console.warn("❌ No driver users found. Make sure users seeder runs first.");
       return;
     }
 
-    // ✅ Insert drivers
-    await queryInterface.bulkInsert("drivers", [
-      {
+    const driversToInsert = [];
+
+    // Insert each driver only if it doesn't exist already
+    const mikeExists = mikeUserId
+      ? await queryInterface.rawSelect("drivers", { where: { user_id: mikeUserId } }, ["id"])
+      : null;
+    if (mikeUserId && !mikeExists) {
+      driversToInsert.push({
         user_id: mikeUserId,
         license_number: "DL1420110012345",
         license_expiry: new Date("2027-12-31"),
@@ -62,8 +60,14 @@ module.exports = {
         documents_verified: true,
         created_at: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000),
         updated_at: new Date(),
-      },
-      {
+      });
+    }
+
+    const sarahExists = sarahUserId
+      ? await queryInterface.rawSelect("drivers", { where: { user_id: sarahUserId } }, ["id"])
+      : null;
+    if (sarahUserId && !sarahExists) {
+      driversToInsert.push({
         user_id: sarahUserId,
         license_number: "DL1420110012346",
         license_expiry: new Date("2026-08-15"),
@@ -85,8 +89,14 @@ module.exports = {
         documents_verified: true,
         created_at: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000),
         updated_at: new Date(),
-      },
-      {
+      });
+    }
+
+    const alexExists = alexUserId
+      ? await queryInterface.rawSelect("drivers", { where: { user_id: alexUserId } }, ["id"])
+      : null;
+    if (alexUserId && !alexExists) {
+      driversToInsert.push({
         user_id: alexUserId,
         license_number: "DL1420110012347",
         license_expiry: new Date("2025-03-20"),
@@ -101,8 +111,14 @@ module.exports = {
         documents_verified: false,
         created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
         updated_at: new Date(),
-      },
-      {
+      });
+    }
+
+    const davidExists = davidUserId
+      ? await queryInterface.rawSelect("drivers", { where: { user_id: davidUserId } }, ["id"])
+      : null;
+    if (davidUserId && !davidExists) {
+      driversToInsert.push({
         user_id: davidUserId,
         license_number: "DL1420110012348",
         license_expiry: new Date("2028-11-10"),
@@ -124,8 +140,12 @@ module.exports = {
         documents_verified: true,
         created_at: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000),
         updated_at: new Date(),
-      },
-    ]);
+      });
+    }
+
+    if (driversToInsert.length > 0) {
+      await queryInterface.bulkInsert("drivers", driversToInsert);
+    }
   },
 
   async down(queryInterface, Sequelize) {

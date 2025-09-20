@@ -1,18 +1,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    // Check if vehicles already exist
-    const existingVehiclesCount = await queryInterface.rawSelect(
-      'vehicles',
-      {},
-      ['COUNT(*) as count']
-    );
-
-    if (existingVehiclesCount && existingVehiclesCount.count > 0) {
-      return;
-    }
-
-    // Get driver IDs by checking drivers table
+    // Get all drivers with their emails
     const drivers = await queryInterface.sequelize.query(
       `SELECT d.id, u.email 
        FROM drivers d 
@@ -21,14 +10,20 @@ module.exports = {
       { type: queryInterface.sequelize.QueryTypes.SELECT }
     );
 
-    if (drivers.length === 0) {
-      return;
-    }
+    if (drivers.length === 0) return;
 
     const vehicleData = [];
 
     for (const driver of drivers) {
-      let vehicleInfo = {};
+      // ✅ Skip if driver already has vehicles
+      const existingVehicle = await queryInterface.rawSelect(
+        'vehicles',
+        { where: { driver_id: driver.id } },
+        ['id']
+      );
+      if (existingVehicle) continue;
+
+      let vehicleInfo = [];
 
       switch (driver.email) {
         case 'mike.driver@example.com':
@@ -131,7 +126,7 @@ module.exports = {
           vehicleInfo = [];
       }
 
-      // Add timestamps to each vehicle
+      // Add timestamps
       vehicleInfo.forEach(vehicle => {
         vehicle.created_at = new Date();
         vehicle.updated_at = new Date();
@@ -144,7 +139,7 @@ module.exports = {
       await queryInterface.bulkInsert('vehicles', vehicleData, {});
       console.log('✅ Demo vehicles seeded successfully');
     } else {
-      console.log('No vehicle data to seed');
+      console.log('No new vehicles to seed');
     }
   },
 

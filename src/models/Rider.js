@@ -38,22 +38,11 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DECIMAL(3, 2),
       defaultValue: 5.00,
       field: 'average_rating'
-    },
-    createdAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      field: 'created_at'
-    },
-    updatedAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      field: 'updated_at'
     }
   }, {
     tableName: 'riders',
     timestamps: true,
-    createdAt: 'created_at',
-    updatedAt: 'updated_at'
+    underscored: true
   });
 
   Rider.associate = (models) => {

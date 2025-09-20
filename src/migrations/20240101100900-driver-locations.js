@@ -58,7 +58,8 @@ module.exports = {
       created_at: {
         allowNull: false,
         type: Sequelize.DATE,
-        comment: 'When this location was recorded'
+        comment: 'When this location was recorded',
+        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
       }
     });
 

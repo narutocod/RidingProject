@@ -42,16 +42,11 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.BOOLEAN,
       defaultValue: true,
       field: 'is_active'
-    },
-    createdAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      field: 'created_at'
     }
   }, {
     tableName: 'driver_locations',
     timestamps: false,
-    createdAt: 'created_at',
+    underscored: true,
     indexes: [
       {
         fields: ['driver_id', 'created_at']

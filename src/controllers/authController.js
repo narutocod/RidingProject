@@ -19,12 +19,7 @@ class AuthController {
       ApiResponse.success(res, result, 'User registered successfully. Please verify your OTP.', 201);
     } catch (error) {
       logger.error('Register controller error:', error);
-
-      if (error.message.includes('already exists')) {
-        return ApiResponse.error(res, error.message, 400);
-      }
-
-      ApiResponse.error(res, 'Registration failed');
+      return ApiResponse.error(res, error.message, 400);
     }
   }
 

@@ -24,7 +24,6 @@ class DriverController {
           profileData.vehicleInsurancePath = req.files.vehicleInsurance[0].path;
         }
       }
-
       const result = await DriverService.updateProfile(userId, profileData);
 
       ApiResponse.success(res, result, 'Driver profile updated successfully');
@@ -35,7 +34,7 @@ class DriverController {
         return ApiResponse.notFound(res, error.message);
       }
 
-      ApiResponse.error(res, 'Failed to update driver profile');
+      ApiResponse.error(res, 'Failed to update driver profile',400);
     }
   }
 

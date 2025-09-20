@@ -48,22 +48,11 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.ENUM('rider_to_driver', 'driver_to_rider'),
       allowNull: false,
       field: 'rating_type'
-    },
-    createdAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      field: 'created_at'
-    },
-    updatedAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      field: 'updated_at'
     }
   }, {
     tableName: 'ratings',
     timestamps: true,
-    createdAt: 'created_at',
-    updatedAt: 'updated_at'
+    underscored: true
   });
 
   Rating.associate = (models) => {

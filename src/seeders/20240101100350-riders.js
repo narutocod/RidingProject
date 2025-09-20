@@ -1,18 +1,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    // ✅ Check if riders already exist
-    const existingRidersCount = await queryInterface.rawSelect(
-      "riders",
-      {},
-      ["id"]
-    );
-
-    if (existingRidersCount) {
-      return;
-    }
-
-    // ✅ Get user IDs for riders (assuming users are seeded first)
+    // Get user IDs for riders (assuming users are seeded first)
     const johnUserId = await queryInterface.rawSelect(
       "users",
       { where: { email: "john.rider@example.com" } },
@@ -31,15 +20,22 @@ module.exports = {
       ["id"]
     );
 
-    // ✅ Skip if any rider user is missing
-    if (!johnUserId || !janeUserId || !robertUserId) {
-      console.warn("❌ Some rider users not found. Make sure users seeder runs first.");
+    if (!johnUserId && !janeUserId && !robertUserId) {
+      console.warn("❌ No rider users found. Make sure users seeder runs first.");
       return;
     }
 
-    // ✅ Insert riders linked to correct user_id
-    await queryInterface.bulkInsert("riders", [
-      {
+    const ridersToInsert = [];
+
+    // Only insert if this user doesn't already have a rider row
+    const johnExists = johnUserId ? await queryInterface.rawSelect(
+      "riders",
+      { where: { user_id: johnUserId } },
+      ["id"]
+    ) : null;
+
+    if (johnUserId && !johnExists) {
+      ridersToInsert.push({
         user_id: johnUserId,
         home_location: JSON.stringify({
           latitude: 28.6139,
@@ -60,8 +56,17 @@ module.exports = {
         average_rating: 4.6,
         created_at: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
         updated_at: new Date(),
-      },
-      {
+      });
+    }
+
+    const janeExists = janeUserId ? await queryInterface.rawSelect(
+      "riders",
+      { where: { user_id: janeUserId } },
+      ["id"]
+    ) : null;
+
+    if (janeUserId && !janeExists) {
+      ridersToInsert.push({
         user_id: janeUserId,
         home_location: JSON.stringify({
           latitude: 28.7041,
@@ -82,8 +87,17 @@ module.exports = {
         average_rating: 4.8,
         created_at: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000),
         updated_at: new Date(),
-      },
-      {
+      });
+    }
+
+    const robertExists = robertUserId ? await queryInterface.rawSelect(
+      "riders",
+      { where: { user_id: robertUserId } },
+      ["id"]
+    ) : null;
+
+    if (robertUserId && !robertExists) {
+      ridersToInsert.push({
         user_id: robertUserId,
         home_location: JSON.stringify({
           latitude: 28.5494,
@@ -100,8 +114,13 @@ module.exports = {
         average_rating: 5.0,
         created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
         updated_at: new Date(),
-      },
-    ]);
+      });
+    }
+
+    // Insert only if there are new riders
+    if (ridersToInsert.length > 0) {
+      await queryInterface.bulkInsert("riders", ridersToInsert);
+    }
   },
 
   async down(queryInterface, Sequelize) {

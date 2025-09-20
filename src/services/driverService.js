@@ -9,12 +9,11 @@ class DriverService {
    * Update driver profile
    */
   static async updateProfile(userId, profileData) {
-    const {
+    let {
       licenseNumber,
       licenseExpiry,
       vehicleDetails,
-      driverLicensePath,
-      emergencyContact
+      driverLicensePath
     } = profileData;
 
     try {
@@ -26,19 +25,19 @@ class DriverService {
       if (!driver) {
         throw new Error('Driver profile not found');
       }
-
       // Update driver details
       const updateData = {};
       if (licenseNumber) updateData.licenseNumber = licenseNumber;
       if (licenseExpiry) updateData.licenseExpiry = licenseExpiry;
       if (driverLicensePath) updateData.driverLicensePath = driverLicensePath;
-
       await driver.update(updateData);
 
       // Update vehicle details if provided
       if (vehicleDetails) {
         let vehicle = await Vehicle.findOne({ where: { driverId: driver.id } });
-
+        if(typeof(vehicleDetails) === "string"){
+        vehicleDetails = JSON.parse(vehicleDetails)
+        }
         if (vehicle) {
           await vehicle.update(vehicleDetails);
         } else {
@@ -79,7 +78,7 @@ class DriverService {
       });
 
       if (!driver) {
-        throw new Error('Driver profile not found');
+        throw new Error('Driver profile not found',404);
       }
 
       return driver;

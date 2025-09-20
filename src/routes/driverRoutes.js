@@ -98,7 +98,7 @@ router.put('/profile', verifyToken, checkRole(['driver']), uploadDriverDocs, han
  *       200:
  *         description: Location updated successfully
  */
-router.post('/location', verifyToken, checkRole(['driver']), createGeneralLimiter, DriverController.updateLocation);
+router.post('/location', verifyToken, checkRole(['driver']), createGeneralLimiter(), DriverController.updateLocation);
 
 /**
  * @swagger
